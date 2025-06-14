@@ -88,6 +88,8 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     isLiveSpace: boolean;
   } | null>(null);
   const [chatName, setChatName] = useState('');
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleSelection = (id: string) => {
     const selectedItem = requests.find(r => r.id === id);
@@ -425,14 +427,28 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fafbfc" />
       <View style={styles.topBar}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Ma3pass</Text>
-          {selectedIds.size > 0 && (
-            <Text style={styles.selectedCount}>
-              {selectedIds.size} selected
-            </Text>
-          )}
-        </View>
+        {isSearchVisible ? (
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#666" />
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search by plate number, name, or route..."
+              placeholderTextColor="#666"
+              autoFocus
+            />
+          </View>
+        ) : (
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Ma3pass</Text>
+            {selectedIds.size > 0 && (
+              <Text style={styles.selectedCount}>
+                {selectedIds.size} selected
+              </Text>
+            )}
+          </View>
+        )}
         <View style={styles.topBarButtons}>
           {selectedIds.size > 0 ? (
             <>
@@ -451,8 +467,8 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
             </>
           ) : (
             <>
-              <TouchableOpacity onPress={() => console.log('Search')}>
-                <Ionicons name="search" size={24} color="black" />
+              <TouchableOpacity onPress={() => setIsSearchVisible(!isSearchVisible)}>
+                <Ionicons name={isSearchVisible ? "close" : "search"} size={24} color="black" />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => console.log('Options')}>
                 <Ionicons name="ellipsis-vertical" size={24} color="black" />
@@ -470,7 +486,25 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
         }}
       >
         <FlatList
-          data={requests}
+          data={requests.filter(item => {
+            if (!searchQuery) return true;
+            const query = searchQuery.toLowerCase();
+            const vehiclePlate = item.vehiclePlate.toLowerCase();
+            const requestor = item.requestor.toLowerCase();
+            const route = item.route.toLowerCase();
+            
+            return (
+              vehiclePlate.includes(query) ||
+              requestor.includes(query) ||
+              route.includes(query) ||
+              // Search in group members if it's a group
+              (item.isGrouped && item.groupMembers?.some(member => 
+                member.vehiclePlate.toLowerCase().includes(query) ||
+                member.requestor.toLowerCase().includes(query) ||
+                member.route.toLowerCase().includes(query)
+              ))
+            );
+          })}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12 }}
@@ -553,6 +587,22 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    color: '#000',
+  },
   titleContainer: {
     flex: 1,
     justifyContent: 'center',
