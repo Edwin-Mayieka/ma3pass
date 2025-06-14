@@ -467,7 +467,14 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
             </>
           ) : (
             <>
-              <TouchableOpacity onPress={() => setIsSearchVisible(!isSearchVisible)}>
+              <TouchableOpacity 
+                onPress={() => {
+                  setIsSearchVisible(!isSearchVisible);
+                  if (isSearchVisible) {
+                    setSearchQuery(''); // Reset search query when closing
+                  }
+                }}
+              >
                 <Ionicons name={isSearchVisible ? "close" : "search"} size={24} color="black" />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => console.log('Options')}>
