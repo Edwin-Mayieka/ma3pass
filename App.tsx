@@ -16,7 +16,11 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ChatScreen from './components/ChatScreen';
 import ChatInfo from './components/ChatInfo';
+import Profile from './components/Profile';
+import ContactList from './components/ContactList';
+import Settings from './components/Settings';
 import { Button, Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
+import { Menu } from 'react-native-paper';
 
 type Member = {
   id: string;
@@ -42,6 +46,9 @@ type RootStackParamList = {
   ChatInfo: {
     members: Member[];
   };
+  Profile: undefined;
+  ContactList: undefined;
+  Settings: undefined;
 };
 
 const mockRequests: RequestItem[] = [
@@ -90,6 +97,7 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
   const [chatName, setChatName] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
 
   const toggleSelection = (id: string) => {
     const selectedItem = requests.find(r => r.id === id);
@@ -477,9 +485,40 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
               >
                 <Ionicons name={isSearchVisible ? "close" : "search"} size={24} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => console.log('Options')}>
-                <Ionicons name="ellipsis-vertical" size={24} color="black" />
-              </TouchableOpacity>
+              <Menu
+                visible={isOptionsMenuVisible}
+                onDismiss={() => setIsOptionsMenuVisible(false)}
+                anchor={
+                  <TouchableOpacity onPress={() => setIsOptionsMenuVisible(true)}>
+                    <Ionicons name="ellipsis-vertical" size={24} color="black" />
+                  </TouchableOpacity>
+                }
+              >
+                <Menu.Item
+                  leadingIcon="account"
+                  onPress={() => {
+                    setIsOptionsMenuVisible(false);
+                    navigation.navigate('Profile');
+                  }}
+                  title="Profile"
+                />
+                <Menu.Item
+                  leadingIcon="contacts"
+                  onPress={() => {
+                    setIsOptionsMenuVisible(false);
+                    navigation.navigate('ContactList');
+                  }}
+                  title="Contact List"
+                />
+                <Menu.Item
+                  leadingIcon="cog"
+                  onPress={() => {
+                    setIsOptionsMenuVisible(false);
+                    navigation.navigate('Settings');
+                  }}
+                  title="Settings"
+                />
+              </Menu>
             </>
           )}
         </View>
@@ -584,6 +623,21 @@ export default function App() {
             <Stack.Screen 
               name="ChatInfo" 
               component={ChatInfo}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="Profile" 
+              component={Profile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="ContactList" 
+              component={ContactList}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+              name="Settings" 
+              component={Settings}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
