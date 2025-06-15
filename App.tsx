@@ -126,7 +126,7 @@ function DrawerContent(props: DrawerContentComponentProps) {
             icon={({ color, size }) => (
               <Ionicons name="person-outline" size={size} color={color} />
             )}
-            label="Profile"
+            label="Account"
             onPress={() => props.navigation.navigate('Profile')}
           />
           <PaperDrawer.Item
@@ -722,6 +722,7 @@ export default function App() {
                 name="Profile" 
                 component={Profile}
                 options={{
+                  title: 'Account',
                   drawerIcon: ({ color, size }) => (
                     <Ionicons name="person-outline" size={size} color={color} />
                   ),
