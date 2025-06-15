@@ -604,6 +604,7 @@ export default function RequestsScreen({ navigation }: RequestsScreenProps) {
         icon="plus"
         style={styles.fab}
         onPress={() => setIsCreateRequestDialogVisible(true)}
+        disabled={selectedIds.size > 0}
       />
 
       <Portal>
@@ -909,6 +910,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 80,
     backgroundColor: '#2563eb',
+    opacity: 1,
   },
   requestTypeContainer: {
     marginBottom: 16,
