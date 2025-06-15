@@ -28,27 +28,6 @@ export default function Settings() {
       </View>
       
       <ScrollView style={styles.content}>
-        {/* Account Settings */}
-        <List.Section>
-          <List.Subheader>Account</List.Subheader>
-          <List.Item
-            title="Account Information"
-            description="Manage your account details"
-            left={props => <List.Icon {...props} icon="account" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-          <List.Item
-            title="Privacy"
-            description="Manage your privacy settings"
-            left={props => <List.Icon {...props} icon="shield-account" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-        </List.Section>
-        
-        <Divider />
-        
         {/* App Settings */}
         <List.Section>
           <List.Subheader>App Settings</List.Subheader>
@@ -140,36 +119,6 @@ export default function Settings() {
         <Divider />
         
         {/* Support & About */}
-        <List.Section>
-          <List.Subheader>Support & About</List.Subheader>
-          <List.Item
-            title="Help & Support"
-            description="Get help and contact support"
-            left={props => <List.Icon {...props} icon="help-circle" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-          <List.Item
-            title="About Ma3pass"
-            description="Version 1.0.0"
-            left={props => <List.Icon {...props} icon="information" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-          <List.Item
-            title="Terms of Service"
-            left={props => <List.Icon {...props} icon="file-document" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-          <List.Item
-            title="Privacy Policy"
-            left={props => <List.Icon {...props} icon="shield" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => {}}
-          />
-        </List.Section>
-        
         {/* Danger Zone */}
         <List.Section>
           <List.Subheader style={styles.dangerZone}>Danger Zone</List.Subheader>

@@ -120,15 +120,8 @@ function DrawerContent(props: DrawerContentComponentProps) {
           </View>
         </View>
 
-        {/* Drawer Items */}
-        <PaperDrawer.Section style={styles.drawerSection}>
-          <PaperDrawer.Item
-            icon={({ color, size }) => (
-              <Ionicons name="home-outline" size={size} color={color} />
-            )}
-            label="Home"
-            onPress={() => props.navigation.navigate('MainStack')}
-          />
+        {/* Menu Items */}
+        <PaperDrawer.Section>
           <PaperDrawer.Item
             icon={({ color, size }) => (
               <Ionicons name="person-outline" size={size} color={color} />
@@ -138,22 +131,45 @@ function DrawerContent(props: DrawerContentComponentProps) {
           />
           <PaperDrawer.Item
             icon={({ color, size }) => (
+              <Ionicons name="help-circle-outline" size={size} color={color} />
+            )}
+            label="Help & Support"
+            onPress={() => {}}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="information-circle-outline" size={size} color={color} />
+            )}
+            label="About Ma3pass (v1.0.0)"
+            onPress={() => {}}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="document-text-outline" size={size} color={color} />
+            )}
+            label="Terms of Service"
+            onPress={() => {}}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="shield-outline" size={size} color={color} />
+            )}
+            label="Privacy Policy"
+            onPress={() => {}}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
               <Ionicons name="settings-outline" size={size} color={color} />
             )}
             label="Settings"
             onPress={() => props.navigation.navigate('Settings')}
           />
-        </PaperDrawer.Section>
-
-        {/* Bottom Section */}
-        <PaperDrawer.Section style={styles.bottomDrawerSection}>
           <PaperDrawer.Item
             icon={({ color, size }) => (
               <Ionicons name="log-out-outline" size={size} color={color} />
             )}
             label="Sign Out"
             onPress={() => {
-              // Handle sign out
               Alert.alert(
                 'Sign Out',
                 'Are you sure you want to sign out?',
@@ -699,10 +715,7 @@ export default function App() {
                 name="MainStack" 
                 component={MainStack}
                 options={{
-                  title: 'Home',
-                  drawerIcon: ({ color, size }) => (
-                    <Ionicons name="home-outline" size={size} color={color} />
-                  ),
+                  drawerItemStyle: { display: 'none' }
                 }}
               />
               <Drawer.Screen 
@@ -765,11 +778,6 @@ const styles = StyleSheet.create({
   },
   drawerSection: {
     marginTop: 15,
-  },
-  bottomDrawerSection: {
-    marginTop: 'auto',
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
   },
   searchContainer: {
     flex: 1,
