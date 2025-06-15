@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
-  TextInput,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -24,6 +23,7 @@ import {
   Searchbar,
   Chip,
   Snackbar,
+  TextInput,
 } from 'react-native-paper';
 import { RequestType, Member, Recipient, RequestItem, DrawerParamList, RootStackParamList } from '../types';
 import { mockRecipients, mockRequests } from '../data/mockData';
@@ -554,16 +554,16 @@ export default function RequestsScreen({ navigation }: RequestsScreenProps) {
           <View style={styles.topBarButtons}>
             {selectedIds.size > 0 ? (
               <>
-                <TouchableOpacity onPress={handleDelete}>
-                  <Ionicons name="trash-outline" size={24} color="#ef4444" />
-                </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     const selectedItems = getSelectedItems();
                     openChat(selectedItems);
                   }}
                 >
-                  <Ionicons name="chatbubble-outline" size={24} color="#2563eb" />
+                  <Ionicons name="chatbubble-outline" size={22} color="#2563eb" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleDelete}>
+                  <Ionicons name="trash-outline" size={22} color="#ef4444" />
                 </TouchableOpacity>
               </>
             ) : (
@@ -611,10 +611,13 @@ export default function RequestsScreen({ navigation }: RequestsScreenProps) {
           <Dialog.Title>Create Group Chat</Dialog.Title>
           <Dialog.Content>
             <TextInput
-              style={styles.searchInput}
+              mode="outlined"
+              label="Group Name"
               placeholder="Enter group name..."
               value={chatName}
               onChangeText={setChatName}
+              style={styles.dialogInput}
+              autoFocus
             />
           </Dialog.Content>
           <Dialog.Actions>
@@ -919,12 +922,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
   },
   dialogInput: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    color: '#000',
+    backgroundColor: '#fff',
+    marginBottom: 8,
   },
   fieldContainer: {
     marginBottom: 16,
