@@ -22,6 +22,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Contacts from 'expo-contacts';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
 
 interface Contact {
   id: string;
@@ -49,8 +51,10 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+type ContactListNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function ContactList() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ContactListNavigationProp>();
   const theme = useTheme();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
@@ -184,6 +188,25 @@ export default function ContactList() {
     }
   };
 
+  const handleMessagePress = (contact: Contact) => {
+    if (!contact.isRegistered) return;
+
+    navigation.navigate('Chat', {
+      members: [{
+        id: contact.id,
+        vehiclePlate: contact.vehiclePlate || 'Unknown',
+        requestor: contact.name,
+        route: 'Unknown',
+        timestamp: new Date(),
+        location: '',
+        chatName: contact.name,
+        sacco: contact.sacco,
+      }],
+      isLiveSpace: false,
+      chatName: contact.name,
+    });
+  };
+
   const renderItem = ({ item }: { item: Contact }) => {
     const isLongPressed = longPressedId === item.id;
 
@@ -230,8 +253,9 @@ export default function ContactList() {
                 togglePin(item);
               } else if (!item.isRegistered) {
                 handleInvite(item);
+              } else {
+                handleMessagePress(item);
               }
-              // If registered and not long pressed, do nothing (will be handled by navigation)
             }}
             style={[
               item.isRegistered ? styles.messageButton : styles.inviteButton,

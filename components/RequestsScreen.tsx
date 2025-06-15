@@ -505,7 +505,7 @@ export default function RequestsScreen({ navigation }: RequestsScreenProps) {
                 <Ionicons name="people" size={20} color="#666" />
               </View>
             ) : (
-              <Text style={styles.route}>{item.route}</Text>
+              <Text style={styles.location}>{item.location}</Text>
             )}
           </View>
         </View>
@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     flex: 1,
   },
-  route: {
+  location: {
     color: '#666',
     fontSize: 14,
     marginLeft: 8,
@@ -1004,8 +1004,10 @@ const styles = StyleSheet.create({
   },
   dotSeparator: {
     color: '#64748b',
+    fontSize: 14,
   },
   saccoName: {
     color: '#64748b',
+    fontSize: 14,
   },
 }); 
