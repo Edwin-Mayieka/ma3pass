@@ -10,6 +10,7 @@ import {
   StatusBar,
   Alert,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
@@ -23,12 +24,25 @@ import ChatInfo from './components/ChatInfo';
 import Account from './components/Account';
 import ContactList from './components/ContactList';
 import Settings from './components/Settings';
-import { Button, Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
-import { Drawer as PaperDrawer } from 'react-native-paper';
+import {
+  Button,
+  Dialog,
+  Portal,
+  Provider as PaperProvider,
+  FAB,
+  List,
+  SegmentedButtons,
+  Searchbar,
+  Chip,
+  Snackbar,
+  Drawer as PaperDrawer,
+} from 'react-native-paper';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { CompositeNavigationProp } from '@react-navigation/native';
 
-type Member = {
+type RequestType = 'traffic_update' | 'route_assignment';
+
+interface Member {
   id: string;
   vehiclePlate: string;
   requestor: string;
@@ -38,7 +52,17 @@ type Member = {
   chatName?: string;
   isGrouped?: boolean;
   groupMembers?: Member[];
-};
+  sacco?: string;
+}
+
+interface Recipient {
+  id: string;
+  name: string;
+  vehiclePlate: string;
+  isPinned?: boolean;
+  isRegistered: boolean;
+  sacco?: string;
+}
 
 type RequestItem = Member;
 
@@ -70,6 +94,169 @@ type RequestsScreenProps = {
   navigation: RequestsScreenNavigationProp;
 };
 
+const mockRecipients: Recipient[] = [
+  { 
+    id: '1', 
+    name: 'John Smith', 
+    vehiclePlate: 'KCF 456Y', 
+    isPinned: true, 
+    isRegistered: true,
+    sacco: 'Super Metro'
+  },
+  { 
+    id: '2', 
+    name: 'Mary Johnson', 
+    vehiclePlate: 'KDG 789Z', 
+    isPinned: true, 
+    isRegistered: true,
+    sacco: 'Metro Trans'
+  },
+  { 
+    id: '3', 
+    name: 'Peter Omondi', 
+    vehiclePlate: 'KBZ 123X', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'City Hoppa'
+  },
+  { 
+    id: '4', 
+    name: 'Sarah Kamau', 
+    vehiclePlate: 'KCA 234W', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Super Metro'
+  },
+  { 
+    id: '5', 
+    name: 'James Maina', 
+    vehiclePlate: 'KDE 567H', 
+    isPinned: true, 
+    isRegistered: true,
+    sacco: 'Forward Travelers'
+  },
+  { 
+    id: '6', 
+    name: 'Alice Wanjiku', 
+    vehiclePlate: 'KBN 890P', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Metro Trans'
+  },
+  { 
+    id: '7', 
+    name: 'David Kiprop', 
+    vehiclePlate: 'KCH 345M', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'City Hoppa'
+  },
+  { 
+    id: '8', 
+    name: 'Grace Akinyi', 
+    vehiclePlate: 'KDJ 678N', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Forward Travelers'
+  },
+  { 
+    id: '9', 
+    name: 'Michael Njoroge', 
+    vehiclePlate: 'KBP 901Q', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Super Metro'
+  },
+  { 
+    id: '10', 
+    name: 'Elizabeth Mutua', 
+    vehiclePlate: 'KCL 234R', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Metro Trans'
+  },
+  { 
+    id: '11', 
+    name: 'Daniel Kimani', 
+    vehiclePlate: 'KDM 567S', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'City Hoppa'
+  },
+  { 
+    id: '12', 
+    name: 'Faith Wambui', 
+    vehiclePlate: 'KBR 890T', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Forward Travelers'
+  },
+  { 
+    id: '13', 
+    name: 'Joseph Ochieng', 
+    vehiclePlate: 'KCN 123U', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Super Metro'
+  },
+  { 
+    id: '14', 
+    name: 'Catherine Njeri', 
+    vehiclePlate: 'KDP 456V', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Metro Trans'
+  },
+  { 
+    id: '15', 
+    name: 'Stephen Mutuku', 
+    vehiclePlate: 'KBT 789W', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'City Hoppa'
+  },
+  { 
+    id: '16', 
+    name: 'Ann Muthoni', 
+    vehiclePlate: 'KCQ 012X', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Forward Travelers'
+  },
+  { 
+    id: '17', 
+    name: 'Patrick Kibet', 
+    vehiclePlate: 'KDR 345Y', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Super Metro'
+  },
+  { 
+    id: '18', 
+    name: 'Lucy Wairimu', 
+    vehiclePlate: 'KBV 678Z', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Metro Trans'
+  },
+  { 
+    id: '19', 
+    name: 'George Otieno', 
+    vehiclePlate: 'KCS 901A', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'City Hoppa'
+  },
+  { 
+    id: '20', 
+    name: 'Jane Chepkemoi', 
+    vehiclePlate: 'KDT 234B', 
+    isPinned: false, 
+    isRegistered: true,
+    sacco: 'Forward Travelers'
+  }
+];
+
 const mockRequests: RequestItem[] = [
   {
     id: '1',
@@ -79,6 +266,7 @@ const mockRequests: RequestItem[] = [
     location: 'Westlands',
     timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
     chatName: 'John Kamau',
+    sacco: 'Super Metro',
   },
   {
     id: '2',
@@ -88,6 +276,7 @@ const mockRequests: RequestItem[] = [
     location: 'Westlands',
     timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
     chatName: 'Peter Omondi',
+    sacco: 'Metro Trans',
   },
   {
     id: '3',
@@ -97,6 +286,7 @@ const mockRequests: RequestItem[] = [
     location: 'Kasarani',
     timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
     chatName: 'Mary Njeri',
+    sacco: 'City Hoppa',
   },
 ];
 
@@ -208,6 +398,7 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [existingGroupChats] = useState<Set<string>>(new Set());
   const [isChatNameDialogVisible, setIsChatNameDialogVisible] = useState(false);
+  const [isCreateRequestDialogVisible, setIsCreateRequestDialogVisible] = useState(false);
   const [pendingChatNavigation, setPendingChatNavigation] = useState<{
     members: Member[];
     isLiveSpace: boolean;
@@ -215,6 +406,34 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
   const [chatName, setChatName] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newRequest, setNewRequest] = useState({
+    type: '' as RequestType,
+    location: '',
+    recipient: null as Recipient | null,
+  });
+  const [recipientSearchQuery, setRecipientSearchQuery] = useState('');
+  const [isSelectingRecipient, setIsSelectingRecipient] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const filteredRecipients = mockRecipients
+    .filter(recipient =>
+      recipient.isRegistered && (
+        recipient.name.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
+        recipient.vehiclePlate?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
+        recipient.sacco?.toLowerCase().includes(recipientSearchQuery.toLowerCase())
+      )
+    )
+    .sort((a, b) => {
+      // Sort pinned contacts to the top
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      // Then sort by name
+      return a.name.localeCompare(b.name);
+    });
+
+  const pinnedRecipients = filteredRecipients.filter(r => r.isPinned);
+  const unpinnedRecipients = filteredRecipients.filter(r => !r.isPinned);
 
   const toggleSelection = (id: string) => {
     const selectedItem = requests.find(r => r.id === id);
@@ -429,8 +648,52 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     clearSelection();
   };
 
+  const showToast = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarVisible(true);
+  };
+
+  const handleCreateRequest = () => {
+    if (!newRequest.type) {
+      showToast('Please select a request type');
+      return;
+    }
+    if (!newRequest.recipient) {
+      showToast('Please select a recipient');
+      return;
+    }
+    if (!newRequest.location) {
+      showToast('Please enter your current location');
+      return;
+    }
+
+    const request: RequestItem = {
+      id: Date.now().toString(),
+      vehiclePlate: newRequest.recipient.vehiclePlate || 'Unknown',
+      requestor: newRequest.recipient.name,
+      route: 'Westlands - CBD', // This would come from account details in production
+      location: newRequest.location,
+      timestamp: new Date(),
+      chatName: newRequest.recipient.name,
+      sacco: newRequest.recipient.sacco,
+    };
+
+    setRequests(prev => [request, ...prev]);
+    setNewRequest({
+      type: '' as RequestType,
+      location: '',
+      recipient: null,
+    });
+    setIsCreateRequestDialogVisible(false);
+  };
+
   const handleChatNameSubmit = () => {
     if (!pendingChatNavigation) return;
+
+    if (!chatName.trim()) {
+      showToast('Please enter a group chat name');
+      return;
+    }
 
     const { members, isLiveSpace } = pendingChatNavigation;
     
@@ -443,7 +706,7 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     // Create a new grouped item with the chat name
     const groupedItem: RequestItem = {
       id: groupId,
-      vehiclePlate: chatName || `Group (${members.length})`, // Ensure we always have a string
+      vehiclePlate: chatName || `Group (${members.length})`,
       requestor: members.length > 2 
         ? `${members[0].requestor}, ${members[1].requestor}...`
         : members.map(i => i.requestor).join(', '),
@@ -457,7 +720,6 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
 
     // Update the requests list with the new group and remove individual items
     setRequests(prev => {
-      // If group doesn't exist, create it and remove individual items
       return [
         groupedItem,
         ...prev.filter(item => !members.some(selectedItem => selectedItem.id === item.id))
@@ -468,11 +730,11 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     navigation.navigate('Chat', {
       members: members.map(item => ({
         ...item,
-        chatName: chatName, // Use the chat name for all members
+        chatName: chatName,
         location: item.location,
       })),
       isLiveSpace,
-      chatName: chatName, // Use the chat name as the title
+      chatName: chatName,
     });
 
     // Reset dialog state
@@ -496,6 +758,36 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     }
   };
 
+  const renderRecipientItem = ({ item }: { item: Recipient }) => (
+    <List.Item
+      title={item.name}
+      description={`${item.vehiclePlate}${item.sacco ? ` • ${item.sacco}` : ''}`}
+      descriptionStyle={styles.recipientDescription}
+      left={props => (
+        <View style={styles.recipientIconContainer}>
+          <List.Icon {...props} icon="account" />
+          {item.isPinned && (
+            <Ionicons 
+              name="star" 
+              size={12} 
+              color="#f59e0b"
+              style={styles.pinnedIcon}
+            />
+          )}
+        </View>
+      )}
+      onPress={() => {
+        setNewRequest(prev => ({ ...prev, recipient: item }));
+        setIsSelectingRecipient(false);
+        setRecipientSearchQuery('');
+      }}
+      style={[
+        styles.recipientItem,
+        item.isPinned && styles.pinnedRecipientItem
+      ]}
+    />
+  );
+
   function renderItem({ item }: { item: RequestItem }) {
     const isSelected = selectedIds.has(item.id);
     
@@ -512,6 +804,11 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
       return date.toLocaleDateString();
     };
 
+    const truncateText = (text: string, maxLength: number) => {
+      if (!text) return '';
+      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    };
+
     return (
       <TouchableOpacity
         style={[
@@ -523,9 +820,23 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
       >
         <View style={styles.requestInfo}>
           <View style={styles.titleRow}>
-            <Text style={styles.vehiclePlate}>
-              {item.isGrouped ? (item.chatName || item.vehiclePlate) : item.vehiclePlate}
-            </Text>
+            <View style={styles.vehicleInfo}>
+              <Text style={styles.vehiclePlate}>
+                {item.isGrouped ? (item.chatName || item.vehiclePlate) : (
+                  <>
+                    {item.vehiclePlate}
+                    {!item.isGrouped && item.sacco && (
+                      <>
+                        <Text style={styles.dotSeparator}> • </Text>
+                        <Text style={styles.saccoName}>
+                          {truncateText(item.sacco, 15)}
+                        </Text>
+                      </>
+                    )}
+                  </>
+                )}
+              </Text>
+            </View>
             <Text style={styles.timestamp}>
               {formatTimestamp(item.timestamp)}
             </Text>
@@ -623,6 +934,22 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     </View>
   );
 
+  // Popular locations
+  const popularLocations = [
+    'CBD',
+    'Westlands',
+    'Kasarani',
+    'Kiambu Road',
+    'Thika Road',
+    'Mombasa Road',
+    'Ngong Road',
+    'Karen',
+  ];
+
+  const handleLocationChipPress = (location: string) => {
+    setNewRequest(prev => ({ ...prev, location }));
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {renderTopBar()}
@@ -634,6 +961,13 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
           contentContainerStyle={{ padding: 16 }}
         />
       </View>
+
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => setIsCreateRequestDialogVisible(true)}
+      />
+
       <Portal>
         <Dialog visible={isChatNameDialogVisible} onDismiss={() => setIsChatNameDialogVisible(false)}>
           <Dialog.Title>Create Group Chat</Dialog.Title>
@@ -663,6 +997,164 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
             </Button>
           </Dialog.Actions>
         </Dialog>
+
+        <Dialog visible={isCreateRequestDialogVisible} onDismiss={() => setIsCreateRequestDialogVisible(false)}>
+          <Dialog.Title>New Request</Dialog.Title>
+          <Dialog.ScrollArea style={{ paddingHorizontal: 0 }}>
+            <ScrollView>
+              <View style={styles.dialogContent}>
+                <View style={styles.requestTypeContainer}>
+                  <Text style={styles.fieldLabel}>Request Type</Text>
+                  <SegmentedButtons
+                    value={newRequest.type}
+                    onValueChange={value => setNewRequest(prev => ({ ...prev, type: value as RequestType }))}
+                    buttons={[
+                      { value: 'traffic_update', label: 'Traffic Update' },
+                      { value: 'route_assignment', label: 'Route Assignment' },
+                    ]}
+                    style={styles.segmentedButtons}
+                  />
+                </View>
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>Recipient</Text>
+                  {newRequest.recipient ? (
+                    <View style={styles.selectedRecipient}>
+                      <View style={styles.selectedRecipientInfo}>
+                        <Text style={styles.selectedRecipientName}>{newRequest.recipient.name}</Text>
+                        <Text style={styles.selectedRecipientPlate}>{newRequest.recipient.vehiclePlate}</Text>
+                      </View>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setIsSelectingRecipient(true)}
+                        style={styles.changeRecipientButton}
+                      >
+                        Change
+                      </Button>
+                    </View>
+                  ) : (
+                    <Button
+                      mode="outlined"
+                      onPress={() => setIsSelectingRecipient(true)}
+                      icon="account-plus"
+                    >
+                      Select Recipient
+                    </Button>
+                  )}
+                </View>
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.fieldLabel}>Current Location</Text>
+                  <TextInput
+                    style={styles.dialogInput}
+                    placeholder="Enter your current location"
+                    value={newRequest.location}
+                    onChangeText={text => setNewRequest(prev => ({ ...prev, location: text }))}
+                  />
+                  <View style={styles.locationChipsContainer}>
+                    <ScrollView 
+                      horizontal 
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.locationChipsScroll}
+                    >
+                      {popularLocations.map((location) => (
+                        <Chip
+                          key={location}
+                          mode="outlined"
+                          selected={newRequest.location === location}
+                          onPress={() => handleLocationChipPress(location)}
+                          style={styles.locationChip}
+                          selectedColor="#2563eb"
+                        >
+                          {location}
+                        </Chip>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+          </Dialog.ScrollArea>
+          <Dialog.Actions>
+            <Button onPress={() => setIsCreateRequestDialogVisible(false)}>
+              Cancel
+            </Button>
+            <Button 
+              mode="contained"
+              onPress={handleCreateRequest}
+              disabled={!newRequest.type || !newRequest.location || !newRequest.recipient}
+            >
+              Create
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog 
+          visible={isSelectingRecipient} 
+          onDismiss={() => setIsSelectingRecipient(false)}
+          style={styles.recipientDialog}
+        >
+          <Dialog.Title>Select Recipient</Dialog.Title>
+          <Dialog.Content style={styles.recipientDialogContent}>
+            <Searchbar
+              placeholder="Search by name, plate number, or sacco"
+              onChangeText={setRecipientSearchQuery}
+              value={recipientSearchQuery}
+              style={styles.searchbar}
+            />
+            
+            <FlatList
+              data={filteredRecipients}
+              renderItem={({ item }) => (
+                <List.Item
+                  title={item.name}
+                  description={`${item.vehiclePlate}${item.sacco ? ` • ${item.sacco}` : ''}`}
+                  descriptionStyle={styles.recipientDescription}
+                  left={props => (
+                    <View style={styles.recipientIconContainer}>
+                      <List.Icon {...props} icon="account" />
+                      {item.isPinned && (
+                        <Ionicons 
+                          name="pin" 
+                          size={14} 
+                          color="#2563eb"
+                          style={styles.pinnedIcon}
+                        />
+                      )}
+                    </View>
+                  )}
+                  onPress={() => {
+                    setNewRequest(prev => ({ ...prev, recipient: item }));
+                    setIsSelectingRecipient(false);
+                    setRecipientSearchQuery('');
+                  }}
+                  style={styles.recipientItem}
+                />
+              )}
+              keyExtractor={item => item.id}
+              style={styles.recipientList}
+              contentContainerStyle={styles.recipientListContent}
+              showsVerticalScrollIndicator={true}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={10}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setIsSelectingRecipient(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={styles.snackbar}
+          action={{
+            label: 'OK',
+            onPress: () => setSnackbarVisible(false),
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
       </Portal>
     </SafeAreaView>
   );
@@ -752,6 +1244,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fafbfc',
+  },
   drawerContent: {
     flex: 1,
   },
@@ -815,10 +1311,6 @@ const styles = StyleSheet.create({
   iconButton: {
     marginLeft: 16,
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#fafbfc',
-  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -868,11 +1360,13 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 4,
   },
+  vehicleInfo: {
+    flex: 1,
+  },
   vehiclePlate: {
     fontWeight: 'bold',
     fontSize: 17,
     color: '#222',
-    flex: 1,
   },
   requestorRow: {
     flexDirection: 'row',
@@ -909,5 +1403,137 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: 8,
     marginRight: 8,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 80,
+    backgroundColor: '#2563eb',
+  },
+  requestTypeContainer: {
+    marginBottom: 16,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 8,
+  },
+  segmentedButtons: {
+    backgroundColor: '#f1f5f9',
+  },
+  dialogInput: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: '#000',
+  },
+  fieldContainer: {
+    marginBottom: 16,
+  },
+  dialogContent: {
+    padding: 20,
+  },
+  searchbar: {
+    marginBottom: 16,
+    marginHorizontal: 20,
+    elevation: 0,
+    backgroundColor: '#f1f5f9',
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  pinnedSection: {
+    marginBottom: 16,
+  },
+  allContactsSection: {
+    paddingBottom: 16,
+  },
+  recipientItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    paddingHorizontal: 20,
+  },
+  pinnedRecipientItem: {
+    backgroundColor: '#fef3c7',
+  },
+  recipientIconContainer: {
+    position: 'relative',
+  },
+  pinnedIcon: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+  },
+  selectedRecipient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fafc',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  selectedRecipientInfo: {
+    flex: 1,
+  },
+  selectedRecipientName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1e293b',
+  },
+  selectedRecipientPlate: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  changeRecipientButton: {
+    marginLeft: 12,
+  },
+  locationChipsContainer: {
+    marginTop: 8,
+  },
+  locationChipsScroll: {
+    paddingVertical: 8,
+    gap: 8,
+  },
+  locationChip: {
+    marginRight: 8,
+    backgroundColor: '#fff',
+  },
+  recipientDialog: {
+    maxHeight: '80%',
+  },
+  recipientDialogContent: {
+    paddingHorizontal: 0,
+  },
+  recipientList: {
+    maxHeight: 400,
+  },
+  recipientListContent: {
+    paddingTop: 8,
+  },
+  dotSeparator: {
+    color: '#94a3b8',
+    fontSize: 16,
+    fontWeight: 'normal',
+  },
+  saccoName: {
+    color: '#64748b',
+    fontSize: 15,
+    fontWeight: 'normal',
+  },
+  snackbar: {
+    marginBottom: 100, // Keep above FAB
+  },
+  recipientDescription: {
+    fontSize: 12,
+    color: '#64748b',
   },
 });
