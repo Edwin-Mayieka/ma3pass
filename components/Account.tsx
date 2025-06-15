@@ -6,10 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
-export default function Profile() {
+export default function Account() {
   const navigation = useNavigation();
   
-  // Profile Data States
+  // Account Data States
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -45,7 +45,7 @@ export default function Profile() {
     }
   };
 
-  // Save Profile Changes
+  // Save Account Changes
   const saveChanges = () => {
     setProfileData(editableData);
     setIsEditing(false);
@@ -68,7 +68,7 @@ export default function Profile() {
         <TouchableRipple onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="black" style={styles.backButton} />
         </TouchableRipple>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>Account</Text>
         <TouchableRipple onPress={() => setIsEditing(!isEditing)} style={styles.editButton}>
           <Ionicons name={isEditing ? "close" : "create-outline"} size={24} color="black" />
         </TouchableRipple>
@@ -214,32 +214,30 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     height: 56,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
-    marginTop: 8,
   },
   backButton: {
-    marginRight: 16,
+    padding: 8,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     color: '#000',
-    flex: 1,
   },
   editButton: {
-    marginLeft: 16,
+    padding: 8,
   },
   content: {
     flex: 1,
-    padding: 16,
   },
   photoSection: {
     alignItems: 'center',
-    marginVertical: 24,
+    paddingVertical: 24,
   },
   changePhotoButton: {
     marginTop: 12,
@@ -258,6 +256,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   section: {
+    paddingHorizontal: 16,
     marginBottom: 24,
   },
   sectionHeader: {
@@ -267,10 +266,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 12,
+    color: '#1f2937',
   },
   inputGroup: {
     gap: 12,
@@ -292,20 +291,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     color: '#2563eb',
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 14,
     color: '#64748b',
-    marginTop: 4,
   },
   routeChip: {
     marginBottom: 8,
   },
   buttonGroup: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 24,
     gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
   },
   button: {
     flex: 1,

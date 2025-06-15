@@ -20,7 +20,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ChatScreen from './components/ChatScreen';
 import ChatInfo from './components/ChatInfo';
-import Profile from './components/Profile';
+import Account from './components/Account';
 import ContactList from './components/ContactList';
 import Settings from './components/Settings';
 import { Button, Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
@@ -44,7 +44,7 @@ type RequestItem = Member;
 
 type DrawerParamList = {
   MainStack: undefined;
-  Profile: undefined;
+  Account: undefined;
   Settings: undefined;
 };
 
@@ -127,7 +127,7 @@ function DrawerContent(props: DrawerContentComponentProps) {
               <Ionicons name="person-outline" size={size} color={color} />
             )}
             label="Account"
-            onPress={() => props.navigation.navigate('Profile')}
+            onPress={() => props.navigation.navigate('Account')}
           />
           <PaperDrawer.Item
             icon={({ color, size }) => (
@@ -150,19 +150,26 @@ function DrawerContent(props: DrawerContentComponentProps) {
             label="Terms of Service"
             onPress={() => {}}
           />
-          <PaperDrawer.Item
-            icon={({ color, size }) => (
-              <Ionicons name="shield-outline" size={size} color={color} />
-            )}
-            label="Privacy Policy"
-            onPress={() => {}}
-          />
-          <PaperDrawer.Item
-            icon={({ color, size }) => (
-              <Ionicons name="settings-outline" size={size} color={color} />
-            )}
-            label="Settings"
-            onPress={() => props.navigation.navigate('Settings')}
+                      <PaperDrawer.Item
+              icon={({ color, size }) => (
+                <Ionicons name="shield-outline" size={size} color={color} />
+              )}
+              label="Privacy Policy"
+              onPress={() => {}}
+            />
+            <PaperDrawer.Item
+              icon={({ color, size }) => (
+                <Ionicons name="help-circle-outline" size={size} color={color} />
+              )}
+              label="FAQ"
+              onPress={() => {}}
+            />
+            <PaperDrawer.Item
+              icon={({ color, size }) => (
+                <Ionicons name="settings-outline" size={size} color={color} />
+              )}
+              label="Settings"
+              onPress={() => props.navigation.navigate('Settings')}
           />
           <PaperDrawer.Item
             icon={({ color, size }) => (
@@ -719,10 +726,9 @@ export default function App() {
                 }}
               />
               <Drawer.Screen 
-                name="Profile" 
-                component={Profile}
+                name="Account" 
+                component={Account}
                 options={{
-                  title: 'Account',
                   drawerIcon: ({ color, size }) => (
                     <Ionicons name="person-outline" size={size} color={color} />
                   ),
