@@ -23,6 +23,7 @@ interface Member {
   vehiclePlate: string;
   id: string;
   requestor: string;
+  sacco?: string;
 }
 
 interface Message {
@@ -242,7 +243,17 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
           ) : (
             <View style={styles.singleChatTitle}>
               <Text style={styles.title}>{members[0]?.requestor}</Text>
-              <Text style={styles.vehiclePlateText}>{members[0]?.vehiclePlate}</Text>
+              <View style={styles.subtitleContainer}>
+                <Text style={styles.vehiclePlateText}>{members[0]?.vehiclePlate}</Text>
+                {members[0]?.sacco && (
+                  <>
+                    <Text style={styles.dotSeparator}>•</Text>
+                    <Text style={styles.saccoText}>
+                      {members[0]?.sacco}
+                    </Text>
+                  </>
+                )}
+              </View>
             </View>
           )}
         </TouchableOpacity>
@@ -310,13 +321,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   singleChatTitle: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+  },
+  subtitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   vehiclePlateText: {
     fontSize: 14,
-    color: '#666',
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  dotSeparator: {
+    color: '#94a3b8',
+    marginHorizontal: 6,
+    fontSize: 14,
+  },
+  saccoText: {
+    fontSize: 14,
+    color: '#64748b',
   },
   header: {
     flexDirection: 'row',
@@ -332,11 +361,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 16,
     overflow: 'hidden', // Ensure marquee stays within bounds
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
   },
   subtitle: {
     fontSize: 14,
