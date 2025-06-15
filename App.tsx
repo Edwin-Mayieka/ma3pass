@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -12,15 +13,20 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ChatScreen from './components/ChatScreen';
 import ChatInfo from './components/ChatInfo';
 import Profile from './components/Profile';
 import ContactList from './components/ContactList';
 import Settings from './components/Settings';
 import { Button, Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
-import { Menu } from 'react-native-paper';
+import { Drawer as PaperDrawer } from 'react-native-paper';
+import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
+import { CompositeNavigationProp } from '@react-navigation/native';
 
 type Member = {
   id: string;
@@ -36,6 +42,12 @@ type Member = {
 
 type RequestItem = Member;
 
+type DrawerParamList = {
+  MainStack: undefined;
+  Profile: undefined;
+  Settings: undefined;
+};
+
 type RootStackParamList = {
   Home: undefined;
   Chat: {
@@ -46,9 +58,16 @@ type RootStackParamList = {
   ChatInfo: {
     members: Member[];
   };
-  Profile: undefined;
   ContactList: undefined;
-  Settings: undefined;
+};
+
+type RequestsScreenNavigationProp = CompositeNavigationProp<
+  NativeStackNavigationProp<RootStackParamList, 'Home'>,
+  DrawerNavigationProp<DrawerParamList>
+>;
+
+type RequestsScreenProps = {
+  navigation: RequestsScreenNavigationProp;
 };
 
 const mockRequests: RequestItem[] = [
@@ -82,8 +101,84 @@ const mockRequests: RequestItem[] = [
 ];
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Drawer = createDrawerNavigator();
 
-type RequestsScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+function DrawerContent(props: DrawerContentComponentProps) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <View style={styles.drawerContent}>
+        {/* Drawer Header */}
+        <View style={styles.drawerHeader}>
+          <View style={styles.userInfoSection}>
+            <View style={styles.profileSection}>
+              <View style={styles.profileImage}>
+                <Ionicons name="person-circle" size={60} color="#2563eb" />
+              </View>
+              <Text style={styles.userName}>John Doe</Text>
+              <Text style={styles.userRole}>Driver</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Drawer Items */}
+        <PaperDrawer.Section style={styles.drawerSection}>
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="home-outline" size={size} color={color} />
+            )}
+            label="Home"
+            onPress={() => props.navigation.navigate('MainStack')}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="person-outline" size={size} color={color} />
+            )}
+            label="Profile"
+            onPress={() => props.navigation.navigate('Profile')}
+          />
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="settings-outline" size={size} color={color} />
+            )}
+            label="Settings"
+            onPress={() => props.navigation.navigate('Settings')}
+          />
+        </PaperDrawer.Section>
+
+        {/* Bottom Section */}
+        <PaperDrawer.Section style={styles.bottomDrawerSection}>
+          <PaperDrawer.Item
+            icon={({ color, size }) => (
+              <Ionicons name="log-out-outline" size={size} color={color} />
+            )}
+            label="Sign Out"
+            onPress={() => {
+              // Handle sign out
+              Alert.alert(
+                'Sign Out',
+                'Are you sure you want to sign out?',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Sign Out',
+                    style: 'destructive',
+                    onPress: () => {
+                      // Add sign out logic here
+                    },
+                  },
+                ],
+                { cancelable: true }
+              );
+            }}
+          />
+        </PaperDrawer.Section>
+      </View>
+    </DrawerContentScrollView>
+  );
+}
 
 function RequestsScreen({ navigation }: RequestsScreenProps) {
   const [requests, setRequests] = useState<RequestItem[]>(mockRequests);
@@ -97,7 +192,6 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
   const [chatName, setChatName] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isOptionsMenuVisible, setIsOptionsMenuVisible] = useState(false);
 
   const toggleSelection = (id: string) => {
     const selectedItem = requests.find(r => r.id === id);
@@ -431,158 +525,107 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fafbfc" />
-      <View style={styles.topBar}>
-        {isSearchVisible ? (
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#666" />
-            <TextInput
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Search by plate number, name, or route..."
-              placeholderTextColor="#666"
-              autoFocus
-            />
-          </View>
-        ) : (
+  const renderTopBar = () => (
+    <View style={styles.topBar}>
+      <TouchableOpacity
+        onPress={() => {
+          console.log('Opening drawer...');
+          navigation.openDrawer();
+        }}
+        style={styles.menuButton}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="menu-outline" size={24} color="#222" />
+      </TouchableOpacity>
+
+      {isSearchVisible ? (
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={20} color="#666" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+          <TouchableOpacity onPress={() => setIsSearchVisible(false)}>
+            <Ionicons name="close-outline" size={24} color="#666" />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Ma3pass</Text>
+            <Text style={styles.title}>Ma3Pass</Text>
             {selectedIds.size > 0 && (
               <Text style={styles.selectedCount}>
                 {selectedIds.size} selected
               </Text>
             )}
           </View>
-        )}
-        <View style={styles.topBarButtons}>
-          {selectedIds.size > 0 ? (
-            <>
-              <TouchableOpacity 
-                onPress={() => openChat(getSelectedItems())}
-                style={styles.iconButton}
-              >
-                <Ionicons name="arrow-up" size={24} color="#2563eb" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={handleDelete}
-                style={styles.iconButton}
-              >
-                <Ionicons name="trash-outline" size={24} color="#dc2626" />
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity 
-                onPress={() => {
-                  setIsSearchVisible(!isSearchVisible);
-                  if (isSearchVisible) {
-                    setSearchQuery(''); // Reset search query when closing
-                  }
-                }}
-              >
-                <Ionicons name={isSearchVisible ? "close" : "search"} size={24} color="black" />
-              </TouchableOpacity>
-              <Menu
-                visible={isOptionsMenuVisible}
-                onDismiss={() => setIsOptionsMenuVisible(false)}
-                anchor={
-                  <TouchableOpacity onPress={() => setIsOptionsMenuVisible(true)}>
-                    <Ionicons name="ellipsis-vertical" size={24} color="black" />
-                  </TouchableOpacity>
-                }
-              >
-                <Menu.Item
-                  leadingIcon="account"
+          
+          <View style={styles.topBarButtons}>
+            {selectedIds.size > 0 ? (
+              <>
+                <TouchableOpacity onPress={handleDelete}>
+                  <Ionicons name="trash-outline" size={24} color="#ef4444" />
+                </TouchableOpacity>
+                <TouchableOpacity
                   onPress={() => {
-                    setIsOptionsMenuVisible(false);
-                    navigation.navigate('Profile');
+                    const selectedItems = getSelectedItems();
+                    openChat(selectedItems);
                   }}
-                  title="Profile"
-                />
-                <Menu.Item
-                  leadingIcon="contacts"
-                  onPress={() => {
-                    setIsOptionsMenuVisible(false);
-                    navigation.navigate('ContactList');
-                  }}
-                  title="Contact List"
-                />
-                <Menu.Item
-                  leadingIcon="cog"
-                  onPress={() => {
-                    setIsOptionsMenuVisible(false);
-                    navigation.navigate('Settings');
-                  }}
-                  title="Settings"
-                />
-              </Menu>
-            </>
-          )}
-        </View>
-      </View>
-      <View 
-        style={styles.listContainer} 
-        onTouchStart={(e) => {
-          if (e.target === e.currentTarget) {
-            clearSelection();
-          }
-        }}
-      >
+                >
+                  <Ionicons name="chatbubble-outline" size={24} color="#2563eb" />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity
+                  onPress={() => setIsSearchVisible(true)}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="search-outline" size={24} color="#222" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ContactList')}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="people-outline" size={24} color="#222" />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </>
+      )}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {renderTopBar()}
+      <View style={styles.listContainer}>
         <FlatList
-          data={requests.filter(item => {
-            if (!searchQuery) return true;
-            const query = searchQuery.toLowerCase();
-            const vehiclePlate = item.vehiclePlate.toLowerCase();
-            const requestor = item.requestor.toLowerCase();
-            const route = item.route.toLowerCase();
-            
-            return (
-              vehiclePlate.includes(query) ||
-              requestor.includes(query) ||
-              route.includes(query) ||
-              // Search in group members if it's a group
-              (item.isGrouped && item.groupMembers?.some(member => 
-                member.vehiclePlate.toLowerCase().includes(query) ||
-                member.requestor.toLowerCase().includes(query) ||
-                member.route.toLowerCase().includes(query)
-              ))
-            );
-          })}
-          keyExtractor={(item) => item.id}
+          data={requests}
           renderItem={renderItem}
-          contentContainerStyle={{ padding: 12 }}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ padding: 16 }}
         />
       </View>
-      
       <Portal>
-        <Dialog
-          visible={isChatNameDialogVisible}
-          onDismiss={() => {
-            setIsChatNameDialogVisible(false);
-            setPendingChatNavigation(null);
-            setChatName('');
-            clearSelection();
-          }}
-        >
-          <Dialog.Title>Enter Chat Name</Dialog.Title>
+        <Dialog visible={isChatNameDialogVisible} onDismiss={() => setIsChatNameDialogVisible(false)}>
+          <Dialog.Title>Create Group Chat</Dialog.Title>
           <Dialog.Content>
             <TextInput
+              style={styles.searchInput}
+              placeholder="Enter group name..."
               value={chatName}
               onChangeText={setChatName}
-              placeholder="Enter chat name"
-              style={{ marginTop: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 4 }}
             />
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              mode="text"
               onPress={() => {
                 setIsChatNameDialogVisible(false);
-                setPendingChatNavigation(null);
-                setChatName('');
                 clearSelection();
               }}
             >
@@ -602,52 +645,132 @@ function RequestsScreen({ navigation }: RequestsScreenProps) {
   );
 }
 
+function MainStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}
+    >
+      <Stack.Screen 
+        name="Home" 
+        component={RequestsScreen}
+      />
+      <Stack.Screen 
+        name="Chat" 
+        component={ChatScreen}
+      />
+      <Stack.Screen 
+        name="ChatInfo" 
+        component={ChatInfo}
+      />
+      <Stack.Screen 
+        name="ContactList" 
+        component={ContactList}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen 
-              name="Home" 
-              component={RequestsScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen 
-              name="Chat" 
-              component={ChatScreen}
-              options={{
-                headerShown: false
+    <NavigationContainer>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <PaperProvider>
+            <Drawer.Navigator
+              drawerContent={(props) => <DrawerContent {...props} />}
+              screenOptions={{
+                headerShown: false,
+                drawerStyle: {
+                  backgroundColor: '#fff',
+                  width: 280,
+                },
+                drawerType: 'front',
+                overlayColor: 'rgba(0,0,0,0.5)',
+                swipeEnabled: true,
+                swipeEdgeWidth: 100,
+                drawerStatusBarAnimation: 'slide',
               }}
-            />
-            <Stack.Screen 
-              name="ChatInfo" 
-              component={ChatInfo}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen 
-              name="Profile" 
-              component={Profile}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen 
-              name="ContactList" 
-              component={ContactList}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen 
-              name="Settings" 
-              component={Settings}
-              options={{ headerShown: false }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </PaperProvider>
-    </SafeAreaProvider>
+              initialRouteName="MainStack"
+            >
+              <Drawer.Screen 
+                name="MainStack" 
+                component={MainStack}
+                options={{
+                  title: 'Home',
+                  drawerIcon: ({ color, size }) => (
+                    <Ionicons name="home-outline" size={size} color={color} />
+                  ),
+                }}
+              />
+              <Drawer.Screen 
+                name="Profile" 
+                component={Profile}
+                options={{
+                  drawerIcon: ({ color, size }) => (
+                    <Ionicons name="person-outline" size={size} color={color} />
+                  ),
+                }}
+              />
+              <Drawer.Screen 
+                name="Settings" 
+                component={Settings}
+                options={{
+                  drawerIcon: ({ color, size }) => (
+                    <Ionicons name="settings-outline" size={size} color={color} />
+                  ),
+                }}
+              />
+            </Drawer.Navigator>
+          </PaperProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  drawerContent: {
+    flex: 1,
+  },
+  drawerHeader: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#f8fafc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  userInfoSection: {
+    marginBottom: 15,
+  },
+  profileSection: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  profileImage: {
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  userRole: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  drawerSection: {
+    marginTop: 15,
+  },
+  bottomDrawerSection: {
+    marginTop: 'auto',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
   searchContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -655,7 +778,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginRight: 12,
+    marginLeft: 8,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
@@ -674,12 +798,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   iconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f8fafc',
+    marginLeft: 16,
   },
   container: {
     flex: 1,
@@ -771,5 +890,9 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 13,
     marginLeft: 8,
+  },
+  menuButton: {
+    padding: 8,
+    marginRight: 8,
   },
 });
